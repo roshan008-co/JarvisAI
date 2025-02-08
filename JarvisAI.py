@@ -2,12 +2,11 @@ import speech_recognition as sr
 import webbrowser
 import pyttsx3
 import os
-import subprocess
 import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.edge.service import Service as EdgeService
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 
 # Initialize the recognizer and text-to-speech engine
@@ -39,36 +38,43 @@ def speak(text):
 # Function to execute commands based on speech
 def execute_command(command):
     if 'open youtube' in command or 'खोलें यूट्यूब' in command:
-        webbrowser.open('https://www.youtube.com')
-        speak("Done. Opening YouTube.")
+        open_browser()
         youtube_search_mode()
     elif 'close youtube' in command or 'बंद करें यूट्यूब' in command:
-        close_browser('msedge.exe')
+        close_browser('chrome.exe')
         speak("Done. Closing YouTube.")
     elif 'open facebook' in command or 'खोलें फेसबुक' in command:
         webbrowser.open('https://www.facebook.com')
         speak("Done. Opening Facebook.")
     elif 'close facebook' in command or 'बंद करें फेसबुक' in command:
-        close_browser('msedge.exe')
+        close_browser('chrome.exe')
         speak("Done. Closing Facebook.")
     elif 'open chatgpt' in command or 'खोलें चैटजीपीटी' in command:
         webbrowser.open('https://chat.openai.com')
         speak("Done. Opening ChatGPT.")
     elif 'close chatgpt' in command or 'बंद करें चैटजीपीटी' in command:
-        close_browser('msedge.exe')
+        close_browser('chrome.exe')
         speak("Done. Closing ChatGPT.")
     elif 'open whatsapp' in command or 'खोलें व्हाट्सएप' in command:
+        open_browser()
         open_whatsapp()
-    elif 'stop' in command or 'exit' in command or 'quit' in command or 'ruk jao' in command or 'रुक जाओ' in command:
+    elif 'stop' in command or 'exit' in command or 'quit' in command or 'ruk jao' in command or 'jarvis shutdown' in command:
         speak("Stopping the program. Goodbye!")
+        if 'driver' in globals():
+            driver.quit()  # Ensure WebDriver is properly closed
         sys.exit()
     else:
         print("Command not recognized, please try again.")
         speak("Command not recognized, please try again.")
 
+# Function to open the browser
+def open_browser():
+    global driver
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+
 # Function for YouTube search mode
 def youtube_search_mode():
-    driver = webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()))
+    speak("YouTube opened. What would you like to search or play?")
     while True:
         search_command = recognize_speech_from_mic("Listening for YouTube search query or play command...")
         if search_command:
@@ -94,15 +100,15 @@ def search_youtube(driver, query):
 def play_video(driver, command):
     video_number = None
 
-    if 'play first video' in command or '1st' in command or 'पहला' in command or 'play Video' in command:
+    if 'first' in command or '1st' in command or 'पहला' in command or 'play first video' in command:
         video_number = 1
-    elif 'play second video' in command or '2nd' in command or 'दूसरा' in command:
+    elif 'second' in command or '2nd' in command or 'दूसरा' in command or 'play second video' in command:
         video_number = 2
-    elif 'play third video' in command or '3rd' in command or 'तीसरा' in command:
+    elif 'third' in command or '3rd' in command or 'तीसरा' in command or 'play third video' in command:
         video_number = 3
-    elif 'play fourth video' in command or '4th' in command or 'चौथा' in command:
+    elif 'fourth' in command or '4th' in command or 'चौथा' in command or 'play fourth video' in command:
         video_number = 4
-    elif 'play fifth video' in command or '5th' in command or 'पांचवा' in command:
+    elif 'fifth' in command or '5th' in command or 'पांचवा' in command or 'play fifth video' in command:
         video_number = 5
 
     if video_number:
@@ -119,7 +125,6 @@ def play_video(driver, command):
 
 # Function to open WhatsApp and send messages
 def open_whatsapp():
-    driver = webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()))
     driver.get('https://web.whatsapp.com')
     speak("Please scan the QR code to log in.")
     time.sleep(15)
@@ -168,6 +173,8 @@ if __name__ == "__main__":
                 if command:
                     if 'stop' in command or 'exit' in command or 'quit' in command or 'ruk jao' in command or 'रुक जाओ' in command:
                         speak("Stopping the program. Goodbye!")
+                        if 'driver' in globals():
+                            driver.quit()  # Ensure WebDriver is properly closed
                         sys.exit()
                     execute_command(command)
         else:
