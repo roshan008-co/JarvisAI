@@ -60,7 +60,7 @@ def open_browser():
 def youtube_search_mode():
     speak("YouTube opened. What would you like to search or play?")
     while True:
-        search_command = recognize_speech_from_mic("Listening for YouTube search query or play command...", timeout=10, phrase_time_limit=10)
+        search_command = recognize_speech_from_mic("Listening for YouTube search query or play command...", timeout=None, phrase_time_limit=None)  # No timeout
         if search_command:
             if 'search' in search_command or 'खोजें' in search_command:
                 search_query = search_command.split('search', 1)[1].strip() if 'search' in search_command else search_command.split('खोजें', 1)[1].strip()
@@ -75,10 +75,9 @@ def youtube_search_mode():
                 go_back(driver)
             elif 'stop' in search_command or 'exit' in search_command or 'quit' in search_command or 'ruk jao' in search_command or 'रुक जाओ' in search_command:
                 speak("Stopping the YouTube search mode.")
-                driver.quit()
-                break
+                break  # Exit the while loop but do not close the browser
             else:
-                speak("Command not recognized. Please say 'search' or 'खोजें' followed by your query, 'play' to play a specific video, 'pause' to pause the video, 'continue' to resume playing, 'back' to go back a step, or 'stop' to exit YouTube search mode.")
+                speak("Command not recognized. Please say 'search', 'play' to play a specific video, 'pause', 'continue', or 'back'.")
 
 # Function to search YouTube
 def search_youtube(driver, query):
@@ -157,7 +156,7 @@ if __name__ == "__main__":
         if command and ('jarvis' in command or 'roshan' in command or 'जार्विस' in command or 'रोशन' in command):
             speak("Yes Sir, how can I assist you?")
             while True:
-                command = recognize_speech_from_mic("Listening for your command...", timeout=10, phrase_time_limit=10)
+                command = recognize_speech_from_mic("Listening for your command...", timeout=None, phrase_time_limit=None)  # No timeout
                 if command:
                     if 'stop' in command or 'exit' in command or 'quit' in command or 'ruk jao' in command or 'रुक जाओ' in command:
                         speak("Stopping the program. Goodbye!")
@@ -168,3 +167,4 @@ if __name__ == "__main__":
         else:
             print("Activation command not detected. Please try again.")
             speak("Activation command not detected. Please try again.")
+            continue
