@@ -1,5 +1,4 @@
 import speech_recognition as sr
-import webbrowser
 import pyttsx3
 import os
 import sys
@@ -43,21 +42,6 @@ def execute_command(command):
     elif 'close youtube' in command or 'बंद करें यूट्यूब' in command:
         close_browser('chrome.exe')
         speak("Done. Closing YouTube.")
-    elif 'open facebook' in command or 'खोलें फेसबुक' in command:
-        webbrowser.open('https://www.facebook.com')
-        speak("Done. Opening Facebook.")
-    elif 'close facebook' in command or 'बंद करें फेसबुक' in command:
-        close_browser('chrome.exe')
-        speak("Done. Closing Facebook.")
-    elif 'open chatgpt' in command or 'खोलें चैटजीपीटी' in command:
-        webbrowser.open('https://chat.openai.com')
-        speak("Done. Opening ChatGPT.")
-    elif 'close chatgpt' in command or 'बंद करें चैटजीपीटी' in command:
-        close_browser('chrome.exe')
-        speak("Done. Closing ChatGPT.")
-    elif 'open whatsapp' in command or 'खोलें व्हाट्सएप' in command:
-        open_browser()
-        open_whatsapp()
     elif 'stop' in command or 'exit' in command or 'quit' in command or 'ruk jao' in command or 'jarvis shutdown' in command:
         speak("Stopping the program. Goodbye!")
         if 'driver' in globals():
@@ -83,12 +67,16 @@ def youtube_search_mode():
                 search_youtube(driver, search_query)
             elif 'play' in search_command:
                 play_video(driver, search_command)
+            elif 'pause' in search_command or 'pause karo' in search_command:
+                pause_video(driver)
+            elif 'continue' in search_command or 'play karo' in search_command:
+                continue_video(driver)
             elif 'stop' in search_command or 'exit' in search_command or 'quit' in search_command or 'ruk jao' in search_command or 'रुक जाओ' in search_command:
                 speak("Stopping the YouTube search mode.")
                 driver.quit()
                 break
             else:
-                speak("Command not recognized. Please say 'search' or 'खोजें' followed by your query, 'play' to play a specific video, or 'stop' to exit YouTube search mode.")
+                speak("Command not recognized. Please say 'search' or 'खोजें' followed by your query, 'play' to play a specific video, 'pause' to pause the video, 'continue' to resume playing, or 'stop' to exit YouTube search mode.")
 
 # Function to search YouTube
 def search_youtube(driver, query):
@@ -123,36 +111,25 @@ def play_video(driver, command):
     else:
         speak("Video number not recognized. Please say 'play first video' or 'play second video'.")
 
-# Function to open WhatsApp and send messages
-def open_whatsapp():
-    driver.get('https://web.whatsapp.com')
-    speak("Please scan the QR code to log in.")
-    time.sleep(15)
+# Function to pause the video on YouTube
+def pause_video(driver):
+    try:
+        video = driver.find_element(By.CSS_SELECTOR, 'video')
+        driver.execute_script("arguments[0].pause();", video)
+        speak("Video paused.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        speak("Sorry, I couldn't pause the video. Please try again.")
 
-    while True:
-        contact_name = recognize_speech_from_mic("Whom do you want to message?")
-        if contact_name:
-            try:
-                search_box = driver.find_element(By.XPATH, "//div[@contenteditable='true'][@data-tab='3']")
-                search_box.clear()
-                search_box.send_keys(contact_name)
-                search_box.send_keys(Keys.RETURN)
-                speak(f"Opened chat with {contact_name}. What do you want to say?")
-                while True:
-                    message = recognize_speech_from_mic("Listening for your message...")
-                    if message:
-                        message_box = driver.find_element(By.XPATH, "//div[@contenteditable='true'][@data-tab='1']")
-                        message_box.send_keys(message)
-                        message_box.send_keys(Keys.RETURN)
-                        speak("Message sent. Do you want to send another message or stop?")
-                        next_command = recognize_speech_from_mic("Listening for next command...")
-                        if 'stop' in next_command or 'exit' in next_command or 'quit' in next_command or 'ruk jao' in next_command or 'रुक जाओ' in next_command:
-                            speak("Stopping. Goodbye!")
-                            driver.quit()
-                            break
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                speak("Sorry, I couldn't open the chat. Please try again.")
+# Function to continue playing the video on YouTube
+def continue_video(driver):
+    try:
+        video = driver.find_element(By.CSS_SELECTOR, 'video')
+        driver.execute_script("arguments[0].play();", video)
+        speak("Video resumed.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        speak("Sorry, I couldn't resume the video. Please try again.")
 
 # Function to close the browser
 def close_browser(keyword):
